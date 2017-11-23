@@ -9,8 +9,8 @@ CLI_VERSION=7.2.0 \
 CLI_BUILD=16285777 \
 GRADLE_VERSION=4.3 \
 MAVEN_VERSION=3.5.2 \
-RUN_USER=daemon \
-RUN_GROUP=daemon \
+RUN_USER=1001 \
+RUN_GROUP=0 \
 MAVEN_HOME=/usr/local/maven \
 GRADLE_HOME=/usr/local/gradle \
 HOME=/opt/app-root \
@@ -65,7 +65,7 @@ RUN set -x \
 && chown -R ${RUN_USER}:${RUN_GROUP} ${USR_LOCAL_BIN} \
 && chmod -R 777 ${USR_LOCAL_BIN}
 
-USER ${RUN_USER}:${RUN_GROUP}
+USER ${RUN_USER}
 
 EXPOSE 8080
 
