@@ -63,7 +63,6 @@ RUN set -x \
 && chmod -R 777 ${USR_LOCAL_BIN}
 
 # Add configuration files, bashrc and other tweaks
-COPY ./s2i/bin/fix-permissions ${USR_LOCAL_BIN}
 COPY ./s2i/bin/ ${STI_SCRIPTS_PATH}
 
 USER 1001
