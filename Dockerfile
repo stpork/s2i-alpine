@@ -2,15 +2,12 @@ FROM openjdk:8-jdk-alpine
 
 MAINTAINER stpork from Mordor team
 
-
 ENV OCP_VERSION=v3.6.1 \
 OCP_BUILD=008f2d5 \
 CLI_VERSION=7.2.0 \
 CLI_BUILD=16285777 \
 GRADLE_VERSION=4.3 \
 MAVEN_VERSION=3.5.2 \
-RUN_USER=1001 \
-RUN_GROUP=0 \
 MAVEN_HOME=/usr/local/maven \
 GRADLE_HOME=/usr/local/gradle \
 HOME=/opt/app-root \
@@ -60,20 +57,16 @@ RUN set -x \
 && unzip -q gradle.zip \
 && mv gradle-${GRADLE_VERSION}/* ${GRADLE_HOME} \
 && rm -rf gradle* \
-&& chown -R ${RUN_USER}:${RUN_GROUP} ${HOME} \
+&& chown -R 1001:0 ${HOME} \
 && chmod -R 777 ${HOME} \
-&& chown -R ${RUN_USER}:${RUN_GROUP} ${USR_LOCAL_BIN} \
+&& chown -R 1001:0 ${USR_LOCAL_BIN} \
 && chmod -R 777 ${USR_LOCAL_BIN}
-
-USER ${RUN_USER}
 
 EXPOSE 8080
 
 # Add configuration files, bashrc and other tweaks
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
-
-RUN chown -R ${RUN_USER}:${RUN_GROUP} ${HOME}
-USER {RUN_USER}:${RUN_GROUP}
+USER 1001
 
 WORKDIR ${HOME}/src
 
