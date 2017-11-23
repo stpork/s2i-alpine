@@ -21,4 +21,4 @@ rm -Rf ./src ./target ./.git ./.mvn ./.m2 ./gradle* ./pom*.xml ./mvnw* ./build.g
 find . -iname "readme" -exec rm {} \;
 
 # Fix source directory permissions
-fix-permissions ./
+#fix-permissions ./
