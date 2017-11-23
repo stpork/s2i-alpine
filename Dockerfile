@@ -23,7 +23,7 @@ JAVA_TOOL_OPTIONS=-Duser.home=${HOME}
 LABEL io.k8s.description="Platform for building and running Spring Boot applications" \
 io.k8s.display-name="S2I Spring Boot Maven 3" \
 io.openshift.expose-services="8080:http" \
-io.openshift.tags="builder,java,java8,maven,maven3,springboot"
+io.openshift.tags="builder,java,java8,maven,maven3,springboot" \
 io.openshift.s2i.scripts-url=image://${STI_SCRIPTS_PATH}
 
 RUN set -x \
