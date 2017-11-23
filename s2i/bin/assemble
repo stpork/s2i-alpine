@@ -1,8 +1,9 @@
 #!/bin/bash
 
-set -e
+set -xe
 
 echo "---> Installing application source"
+pwd
 cp -Rf /tmp/src/. ./
 
 echo "---> Building Spring Boot application from source"
