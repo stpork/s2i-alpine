@@ -1,14 +1,22 @@
-# springboot-maven3-centos
-#
-# This image provide a base for running Spring Boot based applications. It
-# provides a base Java 8 installation and Maven 3.
+FROM openjdk:8-jdk-alpine
 
-FROM openshift/base-centos7
+MAINTAINER stpork from Mordor team
 
-EXPOSE 8080
+ENV OCP_VERSION=v3.6.1 \
+OCP_BUILD=008f2d5 \
+CLI_VERSION=7.2.0 \
+CLI_BUILD=16285777 \
+GRADLE_VERSION=4.3 \
+MAVEN_VERSION=3.5.2 \
+RUN_USER=daemon \
+RUN_GROUP=daemon \
+MAVEN_HOME=/usr/local/maven \
+GRADLE_HOME=/usr/local/gradle \
+HOME=/opt/app-root
 
-ENV JAVA_VERSON=1.8.0 \
-MAVEN_VERSION=3.5.2
+ENV M2_HOME=$MAVEN_HOME \
+PATH=$MAVEN_HOME/bin:$GRADLE_HOME/bin:$PATH \
+JAVA_TOOL_OPTIONS=-Duser.home=${HOME}
 
 LABEL io.k8s.description="Platform for building and running Spring Boot applications" \
       io.k8s.display-name="Spring Boot Maven 3" \
@@ -16,38 +24,52 @@ LABEL io.k8s.description="Platform for building and running Spring Boot applicat
       io.openshift.tags="builder,java,java8,maven,maven3,springboot"
 
 RUN set -x \
-&& yum update -y \
-&& yum install -y curl unzip git java-$JAVA_VERSON-openjdk java-$JAVA_VERSON-openjdk-devel \
-&& yum clean all \
-&& rm -rf /var/cache/yum \
-&& MAVEN_URL=http://www.nic.funet.fi/pub/mirrors/apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
-&& curl -fsSL ${MAVEN_URL} | tar xzf - -C /usr/share \
-&& mv /usr/share/apache-maven-$MAVEN_VERSION /usr/share/maven \
-&& ln -s /usr/share/maven/bin/mvn /usr/bin/mvn \
-&& TOOL_INSTALL=/usr/local/bin \
-&& OCP_VERSION=v3.6.1 \
-&& OCP_BUILD=008f2d5 \
-&& CLI_VERSION=7.2.0 \
-&& CLI_BUILD=16285777 \
-&& OC_URL=http://github.com/openshift/origin/releases/download/${OCP_VERSION}/openshift-origin-client-tools-${OCP_VERSION}-${OCP_BUILD}-linux-64bit.tar.gz \
-&& CLI_URL=http://bobswift.atlassian.net/wiki/download/attachments/${CLI_BUILD}/atlassian-cli-${CLI_VERSION}-distribution.zip \
-&& curl -fsSL ${OC_URL} | tar -xz --strip-components=1 -C "$TOOL_INSTALL" \
-&& cd /opt \
-&& curl -o atlassian-cli.zip -fsSL ${CLI_URL} \
+&& CURL_OPTS=-kfsSL \
+&& apk update -qq \
+&& apk add --no-cache ca-certificates curl git bash openssl nano \
+&& update-ca-certificates --fresh \
+&& rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/* \
+&& mkdir -p ${MAVEN_HOME} \
+&& mkdir -p ${HOME} \
+&& curl ${CURL_OPTS} \
+"http://www.nic.funet.fi/pub/mirrors/apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
+| tar -xz --strip-components=1 -C ${MAVEN_HOME} \
+&& mkdir -p ${HOME}/.m2 \
+&& curl ${CURL_OPTS} ${XML_URL} \
+"https://bitbucket.org/stpork/bamboo-agent/downloads/settings.xml" \
+-o ${HOME}/.m2/settings.xml \
+&& USR_LOCAL_BIN=/usr/local/bin \
+&& curl ${CURL_OPTS} \
+"http://github.com/openshift/origin/releases/download/${OCP_VERSION}/openshift-origin-client-tools-${OCP_VERSION}-${OCP_BUILD}-linux-64bit.tar.gz" \
+| tar -xz --strip-components=1 -C ${USR_LOCAL_BIN} \
+&& cd ${HOME} \
+&& curl ${CURL_OPTS} \
+"http://bobswift.atlassian.net/wiki/download/attachments/${CLI_BUILD}/atlassian-cli-${CLI_VERSION}-distribution.zip" \
+-o atlassian-cli.zip \
 && unzip -q atlassian-cli.zip \
-&& mv atlassian-cli-${CLI_VERSION}/* "$TOOL_INSTALL" \
+&& mv atlassian-cli-${CLI_VERSION}/* ${USR_LOCAL_BIN} \
 && rm -rf atlassian-cli* \
-&& chown -R ${RUN_USER}:${RUN_GROUP} ${TOOL_INSTALL} \
-&& chmod -R 777 ${TOOL_INSTALL}
+&& curl ${CURL_OPTS} ${GRADLE_URL} \
+"https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
+-o gradle.zip \
+&& mkdir -p $GRADLE_HOME \
+&& unzip -q gradle.zip \
+&& mv gradle-${GRADLE_VERSION}/* ${GRADLE_HOME} \
+&& rm -rf gradle* \
+&& chown -R ${RUN_USER}:${RUN_GROUP} ${HOME} \
+&& chmod -R 777 ${HOME} \
+&& chown -R ${RUN_USER}:${RUN_GROUP} ${USR_LOCAL_BIN} \
+&& chmod -R 777 ${USR_LOCAL_BIN}
 
-ENV JAVA_HOME /usr/lib/jvm/java
-ENV MAVEN_HOME /usr/share/maven
+USER ${RUN_USER}:${RUN_GROUP}
+
+EXPOSE 8080
 
 # Add configuration files, bashrc and other tweaks
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 
-RUN chown -R 1001:0 /opt/app-root
-USER 1001
+RUN chown -R ${RUN_USER}:${RUN_GROUP} ${HOME}
+USER {RUN_USER}:${RUN_GROUP}
 
 # Set the default CMD to print the usage of the language image
 CMD $STI_SCRIPTS_PATH/usage
