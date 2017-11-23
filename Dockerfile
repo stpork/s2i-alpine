@@ -59,16 +59,15 @@ RUN set -x \
 && rm -rf gradle* \
 && chown -R 1001:0 ${HOME} \
 && chmod -R 777 ${HOME} \
+&& chown -R 1001:0 /tmp \
+&& chmod -R 777 /tmp \
 && chown -R 1001:0 ${USR_LOCAL_BIN} \
 && chmod -R 777 ${USR_LOCAL_BIN}
-
-EXPOSE 8080
 
 # Add configuration files, bashrc and other tweaks
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 USER 1001
-
-WORKDIR ${HOME}/src
+EXPOSE 8080
 
 # Set the default CMD to print the usage of the language image
 CMD $STI_SCRIPTS_PATH/usage
