@@ -66,7 +66,11 @@ RUN set -x \
 
 # Add configuration files, bashrc and other tweaks
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
+
 USER 1001
+
+WORKDIR ${HOME}
+
 EXPOSE 8080
 
 # Set the default CMD to print the usage of the language image
