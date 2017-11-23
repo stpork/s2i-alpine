@@ -2,6 +2,7 @@ FROM openjdk:8-jdk-alpine
 
 MAINTAINER stpork from Mordor team
 
+
 ENV OCP_VERSION=v3.6.1 \
 OCP_BUILD=008f2d5 \
 CLI_VERSION=7.2.0 \
@@ -12,16 +13,18 @@ RUN_USER=daemon \
 RUN_GROUP=daemon \
 MAVEN_HOME=/usr/local/maven \
 GRADLE_HOME=/usr/local/gradle \
-HOME=/opt/app-root
+HOME=/opt/app-root \
+STI_SCRIPTS_PATH=/usr/libexec/s2i
 
 ENV M2_HOME=$MAVEN_HOME \
 PATH=$MAVEN_HOME/bin:$GRADLE_HOME/bin:$PATH \
 JAVA_TOOL_OPTIONS=-Duser.home=${HOME}
 
 LABEL io.k8s.description="Platform for building and running Spring Boot applications" \
-      io.k8s.display-name="Spring Boot Maven 3" \
-      io.openshift.expose-services="8080:http" \
-      io.openshift.tags="builder,java,java8,maven,maven3,springboot"
+io.k8s.display-name="S2I Spring Boot Maven 3" \
+io.openshift.expose-services="8080:http" \
+io.openshift.tags="builder,java,java8,maven,maven3,springboot"
+io.openshift.s2i.scripts-url=image://${STI_SCRIPTS_PATH}
 
 RUN set -x \
 && CURL_OPTS=-kfsSL \
@@ -31,6 +34,7 @@ RUN set -x \
 && rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/* \
 && mkdir -p ${MAVEN_HOME} \
 && mkdir -p ${HOME} \
+&& mkdir -p ${STI_SCRIPTS_PATH} \
 && curl ${CURL_OPTS} \
 "http://www.nic.funet.fi/pub/mirrors/apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
 | tar -xz --strip-components=1 -C ${MAVEN_HOME} \
@@ -70,6 +74,8 @@ COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 
 RUN chown -R ${RUN_USER}:${RUN_GROUP} ${HOME}
 USER {RUN_USER}:${RUN_GROUP}
+
+WORKDIR ${HOME}/src
 
 # Set the default CMD to print the usage of the language image
 CMD $STI_SCRIPTS_PATH/usage
