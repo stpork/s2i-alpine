@@ -24,7 +24,7 @@ io.openshift.tags="builder,java,java8,maven,maven3,springboot" \
 io.openshift.s2i.scripts-url=image://${STI_SCRIPTS_PATH}
 
 RUN set -x \
-&& CURL_OPTS=-kfsSL \
+&& CURL_OPTS=-fsSL \
 && apk update -qq \
 && apk add --no-cache ca-certificates curl git bash openssl nano \
 && update-ca-certificates --fresh \
@@ -57,10 +57,10 @@ RUN set -x \
 && unzip -q gradle.zip \
 && mv gradle-${GRADLE_VERSION}/* ${GRADLE_HOME} \
 && rm -rf gradle* \
+&& mkdir /lib64 \
+&& ln -s /lib/ld-musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2 \
 && adduser -s /bin/sh -u 1001 -G root -h ${HOME} -S -D default \
-&& chown -R 1001:0 ${HOME} \
-&& chown -R 1001:0 ${USR_LOCAL_BIN} \
-&& chmod -R 777 ${USR_LOCAL_BIN}
+&& chown -R 1001:0 ${HOME}
 
 # Add configuration files, bashrc and other tweaks
 COPY ./s2i/bin/fix-permissions /usr/bin
