@@ -59,7 +59,7 @@ RUN set -x \
 && rm -rf gradle* \
 && adduser -s /bin/sh -u 1001 -G root -h ${HOME} -S -D default \
 && chown -R 1001:0 ${HOME} \
-&& chown -R 1001:0 ${USR_LOCAL_BIN} 
+&& chmod -R 755 ${USR_LOCAL_BIN}
 
 # Add configuration files, bashrc and other tweaks
 COPY ./s2i/bin/fix-permissions /usr/bin
