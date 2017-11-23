@@ -1,4 +1,4 @@
-IMAGE_NAME = stpork/springboot-s2i-base
+IMAGE_NAME = stpork/s2i-alpine
 
 build:
 	docker build -t $(IMAGE_NAME) .
