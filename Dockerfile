@@ -63,7 +63,8 @@ RUN set -x \
 && chmod -R 777 ${USR_LOCAL_BIN}
 
 # Add configuration files, bashrc and other tweaks
-COPY ./s2i/bin/ $STI_SCRIPTS_PATH
+COPY ./s2i/bin/fix-permissions ${USR_LOCAL_BIN}
+COPY ./s2i/bin/ ${STI_SCRIPTS_PATH}
 
 USER 1001
 
@@ -72,4 +73,4 @@ WORKDIR ${HOME}
 EXPOSE 8080
 
 # Set the default CMD to print the usage of the language image
-CMD $STI_SCRIPTS_PATH/usage
+CMD ${STI_SCRIPTS_PATH}/usage
