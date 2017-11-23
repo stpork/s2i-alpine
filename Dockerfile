@@ -57,11 +57,9 @@ RUN set -x \
 && unzip -q gradle.zip \
 && mv gradle-${GRADLE_VERSION}/* ${GRADLE_HOME} \
 && rm -rf gradle* \
-&& chown -R 1001:0 ${HOME} \
+&& chown -R daemon:daemon ${HOME} \
 && chmod -R 777 ${HOME} \
-&& chown -R 1001:0 /tmp \
-&& chmod -R 777 /tmp \
-&& chown -R 1001:0 ${USR_LOCAL_BIN} \
+&& chown -R daemon:daemon ${USR_LOCAL_BIN} \
 && chmod -R 777 ${USR_LOCAL_BIN}
 
 # Add configuration files, bashrc and other tweaks
