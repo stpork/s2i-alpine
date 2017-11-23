@@ -57,12 +57,11 @@ RUN set -x \
 && unzip -q gradle.zip \
 && mv gradle-${GRADLE_VERSION}/* ${GRADLE_HOME} \
 && rm -rf gradle* \
-&& chown -R daemon:daemon ${HOME} \
-&& chmod -R 777 ${HOME} \
-&& chown -R daemon:daemon ${USR_LOCAL_BIN} \
-&& chmod -R 777 ${USR_LOCAL_BIN}
+&& adduser -s /bin/sh -u 1001 -G root -h ${HOME} -S -D default \
+&& chown -R 1001:0 ${HOME} 
 
 # Add configuration files, bashrc and other tweaks
+COPY ./s2i/bin/fix-permissions /usr/bin
 COPY ./s2i/bin/ ${STI_SCRIPTS_PATH}
 
 USER 1001
